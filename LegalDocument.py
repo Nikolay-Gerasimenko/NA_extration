@@ -103,8 +103,16 @@ class LegalDocument:
 
     def get_na_level(self, level_pattern, text):
         na_level_part = re.match(level_pattern + '([\d\s\.,\-и]+)', text)
+            
         dash_numbers = re.search('[\d\.\s]+\-[\d\.\s]+', na_level_part.group(0))
-        if dash_numbers is not None:
+        number_interval = re.search('(?<!\.)(\d+)\s?\-\s?(\d+)(?!\.)', na_level_part.group(0))
+        if number_interval is not None:
+            print(number_interval)
+            na_level_part_without_interval = na_level_part.group(0)[:number_interval.start()] + na_level_part.group(0)[number_interval.end():]
+            range_na_levels = [i for i in range(int(number_interval.group(1)), int(number_interval.group(2))+1)]
+            na_levels_numbers = re.findall('[\d\.]+', na_level_part_without_interval)
+            res = na_levels_numbers + range_na_levels
+        elif dash_numbers is not None:
             na_level_part_without_dash = na_level_part.group(0)[:dash_numbers.start()] + na_level_part.group(0)[dash_numbers.end():]
             ranged_na_levels = re.search('\d+(?=\.)', dash_numbers[0]).group(0)
             punkt_numbers = re.findall('(?<=\.)\d+', dash_numbers[0])
